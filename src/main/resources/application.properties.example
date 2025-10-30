@@ -1,0 +1,9 @@
+# STEP Platform Credentials (REQUIRED - obtain from STEP portal)
+# Copy this file to application.properties and add your credentials
+# Register at: https://developer.vodafone.com/step
+app.id=YOUR_APPLICATION_ID_HERE
+app.token=YOUR_APPLICATION_TOKEN_HERE
+
+# Test Location (Paris coordinates)
+test.latitude=48.866667
+test.longitude=2.333333
