@@ -4,7 +4,7 @@ import com.vodafone.v2xsdk4javav2.facade.events.BaseEvent;
 import com.vodafone.v2xsdk4javav2.facade.events.EventListener;
 import com.vodafone.v2xsdk4javav2.facade.events.EventType;
 import com.vodafone.v2xsdk4javav2.facade.events.EventCamListChanged;
-import com.vodafone.v2xsdk4javav2.facade.records.CAMRecord;
+import com.vodafone.v2xsdk4javav2.facade.records.cam.CAMRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +13,7 @@ public class CAMHandler implements EventListener {
     
     @Override
     public void onMessageBusEvent(BaseEvent baseEvent) {
-        if (baseEvent.getEventType() == EventType.CAMLISTCHANGED) {
+        if (baseEvent.getEventType() == EventType.CAM_LIST_CHANGED) {
             EventCamListChanged event = (EventCamListChanged) baseEvent;
             logger.info("Received {} CAM messages", event.getList().size());
             
@@ -22,7 +22,7 @@ public class CAMHandler implements EventListener {
                     cam.getStationID(),
                     cam.getLatitude(),
                     cam.getLongitude(),
-                    cam.getSpeed());
+                    cam.getSpeedInKmH());
             }
         }
     }

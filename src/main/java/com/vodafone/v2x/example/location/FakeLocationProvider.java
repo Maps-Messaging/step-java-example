@@ -1,11 +1,11 @@
 package com.vodafone.v2x.example.location;
 
-import com.vodafone.v2xsdk4javav2.facade.location.GnssLocation;
-import com.vodafone.v2xsdk4javav2.facade.location.LocationProvider;
+import com.vodafone.v2xsdk4javav2.facade.locationprovider.LocationProvider;
+import com.vodafone.v2xsdk4javav2.facade.models.GnssLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FakeLocationProvider extends LocationProvider implements Runnable {
+public  class FakeLocationProvider extends LocationProvider implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(FakeLocationProvider.class);
     
     private final double latitude;
@@ -20,13 +20,14 @@ public class FakeLocationProvider extends LocationProvider implements Runnable {
     }
     
     @Override
-    public void turnOn() {
+    public boolean turnOn() {
         if (!running) {
             running = true;
             locationThread = new Thread(this, "FakeLocationProvider");
             locationThread.start();
             logger.info("Fake location provider started");
         }
+        return false;
     }
     
     @Override
@@ -65,7 +66,7 @@ public class FakeLocationProvider extends LocationProvider implements Runnable {
                     timestamp
                 );
                 
-                updateLocation(location);
+                super.notifyFreshLocation(location);
                 
                 Thread.sleep(1000);
                 

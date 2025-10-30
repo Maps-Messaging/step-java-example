@@ -4,7 +4,7 @@ import com.vodafone.v2xsdk4javav2.facade.events.BaseEvent;
 import com.vodafone.v2xsdk4javav2.facade.events.EventListener;
 import com.vodafone.v2xsdk4javav2.facade.events.EventType;
 import com.vodafone.v2xsdk4javav2.facade.events.EventDenmListChanged;
-import com.vodafone.v2xsdk4javav2.facade.records.DENMRecord;
+import com.vodafone.v2xsdk4javav2.facade.records.denm.DENMRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +13,7 @@ public class DENMHandler implements EventListener {
     
     @Override
     public void onMessageBusEvent(BaseEvent baseEvent) {
-        if (baseEvent.getEventType() == EventType.DENMLISTCHANGED) {
+        if (baseEvent.getEventType() == EventType.DENM_LIST_CHANGED) {
             EventDenmListChanged event = (EventDenmListChanged) baseEvent;
             logger.info("Received {} DENM messages", event.getList().size());
             
