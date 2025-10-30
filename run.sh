@@ -1,52 +1,48 @@
 #!/bin/bash
 
-# V2X STEP Java Application Runner
-# This script builds and runs the V2X application
+# V2X Example Application Runner
 
-set -e
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
 
-echo "=== V2X STEP Java Application Runner ==="
-echo ""
+echo -e "${GREEN}Starting V2X Example Application...${NC}"
 
-# Check if the SDK jar exists
-if [ ! -f "lib/v2xsdk4java-3.1.0.jar" ]; then
-    echo "ERROR: Vodafone V2X SDK jar not found at lib/v2xsdk4java-3.1.0.jar"
-    echo "Please place the SDK jar file in the lib/ directory"
-    echo ""
-    echo "To obtain the SDK:"
-    echo "  1. Contact Vodafone or download from official sources"
-    echo "  2. Copy to: lib/v2xsdk4java-3.1.0.jar"
-    echo ""
+# Check if SDK jar exists
+SDK_JAR="lib/v2xsdk4java-3.1.0.jar"
+if [ ! -f "$SDK_JAR" ]; then
+    echo -e "${RED}Error: SDK jar not found at $SDK_JAR${NC}"
+    echo "Please copy the Vodafone V2X SDK jar to the lib/ directory"
     exit 1
 fi
 
-# Check if application.properties exists
+# Check if application properties exist
 if [ ! -f "src/main/resources/application.properties" ]; then
-    echo "ERROR: Configuration file not found at src/main/resources/application.properties"
-    echo "Please create the configuration file with your STEP credentials"
-    echo ""
-    echo "Example:"
-    echo "  app.id=YOUR_APPLICATION_ID_HERE"
-    echo "  app.token=YOUR_APPLICATION_TOKEN_HERE"
-    echo "  test.latitude=48.866667"
-    echo "  test.longitude=2.333333"
-    echo ""
+    echo -e "${RED}Error: application.properties not found${NC}"
     exit 1
 fi
 
-# Build the application
-echo "Building the application..."
-mvn clean package -q
+# Option 1: Run using the fat JAR (recommended after mvn package)
+if [ -f "target/step-java-example.jar" ]; then
+    echo -e "${GREEN}Running from packaged JAR...${NC}"
+    java -jar target/step-java-example.jar
+    exit $?
+fi
 
-if [ $? -eq 0 ]; then
-    echo "Build successful!"
-    echo ""
-    
-    # Run the application
-    echo "Running V2X STEP Java Application..."
-    echo ""
-    java -jar target/step-java-example-1.0.0-shaded.jar
+# Option 2: Run using Maven with explicit classpath
+echo -e "${YELLOW}JAR not found, running with Maven...${NC}"
+echo "Building and running..."
+
+# Build first
+mvn clean package -DskipTests
+
+# Run the fat JAR
+if [ -f "target/step-java-example.jar" ]; then
+    echo -e "${GREEN}Running application...${NC}"
+    java -jar target/step-java-example.jar
 else
-    echo "Build failed!"
+    echo -e "${RED}Build failed or JAR not created${NC}"
     exit 1
 fi

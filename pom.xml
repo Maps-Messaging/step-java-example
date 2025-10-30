@@ -48,6 +48,7 @@
     </dependencies>
 
     <build>
+        <finalName>step-java-example</finalName>
         <plugins>
             <!-- Maven Compiler Plugin -->
             <plugin>
@@ -103,9 +104,31 @@
                                     </excludes>
                                 </filter>
                             </filters>
+                            <!-- Include system-scoped dependencies -->
+                            <includeSystemScope>true</includeSystemScope>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- Maven Exec Plugin - Alternative execution method -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>com.vodafone.v2x.example.V2XApplication</mainClass>
+                    <includePluginDependencies>true</includePluginDependencies>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.vodafone</groupId>
+                        <artifactId>v2xsdk4java</artifactId>
+                        <version>3.1.0</version>
+                        <scope>system</scope>
+                        <systemPath>${project.basedir}/lib/v2xsdk4java-3.1.0.jar</systemPath>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
