@@ -76,6 +76,11 @@ logs/
 *.swo
 *~
 
-# SDK jar - Keep this commented out initially so lib/README.md is tracked
-# Uncomment the line below if you want to exclude the actual SDK jar from version control
-# lib/vodafone-step-sdk.jar
+# SDK jar - exclude from version control (user must provide)
+lib/v2xsdk4java-3.1.0.jar
+lib/*.jar
+
+# Application configuration with credentials
+src/main/resources/application.properties
+# Keep the example file tracked
+!src/main/resources/application.properties.example

@@ -1,42 +1,26 @@
-# V2X Send/Receive Sample Application
+# V2X STEP Java Application
 
-A standalone Java console application demonstrating basic send and receive functionality for V2X (Vehicle-to-Everything) events using the Vodafone STEP Java SDK.
+A standalone Java console application demonstrating V2X event send/receive using the Vodafone STEP Java SDK (com.vodafone.v2xsdk4javav2.facade).
 
 ## Overview
 
-This sample application provides a pure Java implementation for V2X communication, without any UI or Android OS dependencies. It demonstrates how to:
+This application provides a complete working example of V2X communication using the Vodafone STEP platform. It demonstrates:
 
-- Initialize the Vodafone STEP SDK client
-- Send V2X messages (CAM, DENM, and custom events)
-- Receive V2X messages from other vehicles and infrastructure
-- Handle V2X events with proper lifecycle management
-- Implement error handling and logging
+- Connecting to the STEP platform using the Vodafone V2X SDK
+- Broadcasting CAM (Cooperative Awareness Messages) with vehicle position and status
+- Receiving CAM messages from nearby vehicles
+- Sending DENM (Decentralized Environmental Notification Messages) for hazardous events
+- Receiving DENM messages from other road users
+- Proper SDK lifecycle management and graceful shutdown
 
 **Inspired by:** [HelloV2XWorld-Android](https://github.com/Vodafone/HelloV2XWorld-Android)
 
-## V2X Message Types
-
-The application demonstrates the following V2X message types:
-
-### CAM (Cooperative Awareness Message)
-- Broadcast periodically to inform other vehicles about presence, position, speed, and status
-- Typical frequency: 1-10 Hz depending on vehicle dynamics
-- Contains: position (lat/lon), speed, heading, timestamp
-
-### DENM (Decentralized Environmental Notification Message)
-- Event-triggered messages for hazardous situations
-- Used for: accidents, road works, weather conditions, obstacles
-- Contains: event location, event type, severity level, timestamp
-
-### Custom Events
-- Application-specific V2X messages
-- Flexible payload structure for custom use cases
-
 ## Prerequisites
 
-- **Java 21 or higher** - The project targets Java 21
+- **Java 21 or later** - The project targets Java 21
 - **Maven 3.6+** - For building the project
-- **Vodafone STEP SDK** - The SDK jar file (to be placed in `lib/` directory)
+- **Vodafone STEP credentials** - ApplicationID and ApplicationToken from the [STEP portal](https://developer.vodafone.com/step)
+- **V2X SDK jar file** - v2xsdk4java-3.1.0.jar (to be placed in `lib/` directory)
 
 ### Checking Java Version
 
@@ -55,65 +39,68 @@ mvn -version
 ## Project Structure
 
 ```
-v2x-sample/
-├── pom.xml                          # Maven project configuration
-├── README.md                        # This file
-├── lib/                             # SDK jar location
-│   ├── README.md                    # Instructions for SDK placement
-│   └── vodafone-step-sdk.jar       # Place SDK jar here
-├── src/
-│   └── main/
-│       ├── java/
-│       │   └── com/vodafone/v2x/sample/
-│       │       ├── V2XSampleApp.java       # Main application
-│       │       ├── V2XEventSender.java     # Sends V2X events
-│       │       ├── V2XEventReceiver.java   # Receives V2X events
-│       │       ├── V2XEventPayload.java    # Event data structure
-│       │       ├── V2XEventListener.java   # Event listener interface
-│       │       └── V2XException.java       # V2X exception class
-│       └── resources/
-│           └── simplelogger.properties     # Logging configuration
-└── target/                          # Build output (generated)
+step-java-example/
+├── pom.xml                                      # Maven build configuration
+├── README.md                                    # This file
+├── doc/
+│   └── Java V2X SDK - User Guide 3.1.0.pdf     # SDK documentation
+├── lib/
+│   └── v2xsdk4java-3.1.0.jar                   # Place SDK jar here
+├── src/main/
+│   ├── java/com/vodafone/v2x/example/
+│   │   ├── V2XApplication.java                 # Main application class
+│   │   ├── config/
+│   │   │   └── AppConfig.java                  # Configuration holder
+│   │   ├── location/
+│   │   │   └── FakeLocationProvider.java       # Test location provider (Annex 10.3)
+│   │   └── handlers/
+│   │       ├── CAMHandler.java                 # CAM event handler
+│   │       └── DENMHandler.java                # DENM event handler
+│   └── resources/
+│       ├── application.properties              # App credentials & config
+│       └── logback.xml                         # Logging configuration
+└── target/                                      # Build output (generated)
 ```
 
 ## Setup Instructions
 
-### 1. Clone or Download the Project
+### 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
-cd v2x-sample
+cd step-java-example
 ```
 
-### 2. Place the STEP SDK Jar
+### 2. Place the SDK Jar
 
-Copy the Vodafone STEP SDK jar file to the `lib/` directory:
+Copy the Vodafone V2X SDK jar file to the `lib/` directory:
 
 ```bash
-cp /path/to/vodafone-step-sdk.jar lib/
+cp /path/to/v2xsdk4java-3.1.0.jar lib/
 ```
 
-**Important:** The jar file must be named `vodafone-step-sdk.jar`
+**Important:** The jar file must be named exactly `v2xsdk4java-3.1.0.jar`
 
-### 3. Configure STEP SDK Credentials (Optional)
+### 3. Configure STEP Credentials
 
-For production use, you may need to configure API credentials. This can be done via:
+Edit `src/main/resources/application.properties` and add your STEP credentials:
 
-- Environment variables
-- Configuration file
-- Command-line arguments
+```properties
+# STEP Platform Credentials (obtain from STEP portal)
+app.id=YOUR_APPLICATION_ID_HERE
+app.token=YOUR_APPLICATION_TOKEN_HERE
 
-Example environment variables:
-
-```bash
-export STEP_API_KEY="your-api-key"
-export STEP_CLIENT_ID="your-client-id"
-export STEP_API_ENDPOINT="https://api.step.vodafone.com"
+# Test Location (Paris coordinates)
+test.latitude=48.866667
+test.longitude=2.333333
 ```
 
-## Building the Application
+To obtain credentials:
+1. Register at the [Vodafone STEP Developer Portal](https://developer.vodafone.com/step)
+2. Create a new application
+3. Copy the Application ID and Application Token
 
-### Build with Maven
+### 4. Build the Application
 
 ```bash
 mvn clean package
@@ -121,35 +108,27 @@ mvn clean package
 
 This will:
 1. Compile the Java source files
-2. Run tests (if any)
-3. Create a regular jar: `target/v2x-sample-1.0.0.jar`
-4. Create an uber jar with dependencies: `target/v2x-sample-1.0.0-shaded.jar`
-
-### Build Output
-
-After a successful build, you'll find:
-
-- `target/v2x-sample-1.0.0.jar` - Regular jar (requires classpath)
-- `target/v2x-sample-1.0.0-shaded.jar` - Uber jar with all dependencies
+2. Create a regular jar: `target/step-java-example-1.0.0.jar`
+3. Create an uber jar with dependencies: `target/step-java-example-1.0.0-shaded.jar`
 
 ## Running the Application
 
 ### Option 1: Run with Maven
 
 ```bash
-mvn exec:java -Dexec.mainClass="com.vodafone.v2x.sample.V2XSampleApp"
+mvn exec:java -Dexec.mainClass="com.vodafone.v2x.example.V2XApplication"
 ```
 
 ### Option 2: Run the Uber Jar
 
 ```bash
-java -jar target/v2x-sample-1.0.0-shaded.jar
+java -jar target/step-java-example-1.0.0-shaded.jar
 ```
 
-### Option 3: Run with Classpath
+### Option 3: Use the Run Script
 
 ```bash
-java -cp target/v2x-sample-1.0.0.jar com.vodafone.v2x.sample.V2XSampleApp
+./run.sh
 ```
 
 ## Expected Output
@@ -157,182 +136,200 @@ java -cp target/v2x-sample-1.0.0.jar com.vodafone.v2x.sample.V2XSampleApp
 When you run the application, you should see output similar to:
 
 ```
-=== V2X Send/Receive Sample Application ===
-Vodafone STEP SDK - Pure Java Console Application
+=== V2X STEP Java Application ===
+Vodafone V2X SDK Demo - CAM and DENM Example
 
-Step 1: Initializing STEP client...
-STEP client initialized successfully
+Step 1: Loading configuration...
+  Application ID: your-app-id
+  Test Location: (48.866667, 2.333333)
 
-Step 2: Creating sender and receiver...
-Sender and receiver created
+Step 2: Initializing location provider...
+  Location provider initialized
 
-Step 3: Connecting sender...
-V2X Event Sender connected successfully
+Step 3: Configuring V2X SDK...
+  SDK configuration created
+  - Station Type: PASSENGERCAR
+  - CAM Service Mode: TxAndRx
+  - DENM Service Mode: TxAndRx
 
-Step 4: Connecting receiver...
-V2X Event Receiver connected successfully
+Step 4: Creating V2X SDK instance...
+  V2X SDK instance created
 
-Step 5: Setting up event listener...
-Event listener registered
+Step 5: Starting V2X service...
+  V2X service start initiated
 
-Step 6: Starting receiver...
-V2X event listener started successfully
+Step 6: Waiting for V2X service initialization...
+  V2X service is UP AND RUNNING
 
-Step 7: Demonstrating V2X message sending...
-Sending CAM (Cooperative Awareness Message)...
-  Location: 51.5074° N, 0.1278° W (London)
-  Speed: 13.89 m/s (50 km/h)
-  Heading: 45° (Northeast)
-✓ CAM sent successfully
+Step 7: Waiting for STEP connectivity...
+  Connected to STEP platform
 
-Sending DENM (Decentralized Environmental Notification Message)...
-  Location: 51.5074° N, 0.1278° W
-  Event: ROAD_WORKS
-  Severity: 3 (Moderate)
-✓ DENM sent successfully
+Step 8: Subscribing to SDK events...
+  Event handlers registered
+  - CAM list change events
+  - DENM list change events
 
-Step 8: Demonstrating V2X message receiving...
->>> Event Received via Listener <<<
-    Type: CAM
-    Latitude: 52.52
-    Longitude: 13.405
-    Speed: 11.11 m/s
-    ...
+Step 9: Starting CAM service...
+  CAM service started - broadcasting vehicle presence
 
-Step 9: Cleanup and shutdown...
+Step 10: Starting DENM service...
+  DENM service started
+
+Step 11: Sending test DENM...
+  DENM triggered with sequence number: 12345
+  Event Type: ACCIDENT
+  Location: (48.866667, 2.333333)
+
+Step 12: Application running - receiving V2X messages...
+  Press Ctrl+C to stop
+  Monitoring period: 60 seconds
+
+Received 3 CAM messages
+  CAM from StationID: 123, Position: (48.85, 2.34), Speed: 50.0 km/h
+  CAM from StationID: 456, Position: (48.87, 2.35), Speed: 60.0 km/h
+  ...
+
+Received 1 DENM messages
+  DENM from StationID: 789, CauseCode: 6, SubCauseCode: 1
+
+Step 13: Terminating DENM...
+  DENM terminated
+
+Step 14: Performing cleanup...
+  Stopping CAM service...
+  Stopping DENM service...
+  Stopping V2X service...
+  All services stopped
+  Cleanup completed
+
 === Application completed successfully ===
 ```
 
-## Usage Examples
+## What It Does
 
-### Sending a CAM Message
+### SDK Initialization (Sections 8.3.1-8.3.6)
+1. Loads configuration from `application.properties`
+2. Creates a fake location provider for testing (Annex 10.3)
+3. Configures the SDK with STEP credentials and service modes
+4. Creates and starts the V2XSDK instance
+5. Waits for service initialization and STEP platform connectivity
 
-```java
-V2XEventSender sender = new V2XEventSender(stepClient);
-sender.connect();
+### CAM Service (Section 8.3.8)
+- Broadcasts CAM messages periodically (1 Hz default)
+- Contains vehicle position, speed, heading, and timestamp
+- Receives CAM messages from other vehicles via `CAMHandler`
+- Standard ETSI TS 103 900
 
-// Send CAM with vehicle position and dynamics
-boolean sent = sender.sendCAM(
-    51.5074,  // latitude
-    -0.1278,  // longitude
-    13.89,    // speed in m/s
-    45.0      // heading in degrees
-);
-```
+### DENM Service (Section 8.3.9)
+- Triggers event-based DENM messages for hazardous situations
+- Test DENM sent with type "ACCIDENT" at configured location
+- Receives DENM messages from other road users via `DENMHandler`
+- Standard ETSI TS 103 831
 
-### Sending a DENM Message
-
-```java
-// Alert about road works
-boolean sent = sender.sendDENM(
-    51.5074,       // latitude
-    -0.1278,       // longitude
-    "ROAD_WORKS",  // event type
-    3              // severity (1-5)
-);
-```
-
-### Receiving V2X Events
-
-```java
-V2XEventReceiver receiver = new V2XEventReceiver(stepClient);
-receiver.connect();
-
-// Add event listener
-receiver.addListener((eventType, payload) -> {
-    System.out.println("Received: " + eventType);
-    System.out.println("Location: " + payload.getLatitude() + 
-                       ", " + payload.getLongitude());
-});
-
-// Start listening
-receiver.startListening();
-```
-
-### Custom Event Payload
-
-```java
-V2XEventPayload payload = V2XEventPayload.builder()
-    .latitude(48.8566)
-    .longitude(2.3522)
-    .speed(16.67)
-    .heading(180.0)
-    .timestamp(System.currentTimeMillis())
-    .additionalData("Custom data")
-    .build();
-
-sender.sendEvent("CUSTOM", payload);
-```
+### Graceful Shutdown (Section 8.3.17)
+- Terminates active DENM messages
+- Stops CAM and DENM services
+- Stops V2X service
+- Cleans up location provider
 
 ## Configuration
 
-### Logging Configuration
+### Application Properties
 
-Logging is configured via `src/main/resources/simplelogger.properties`.
-
-To change log level:
+Edit `src/main/resources/application.properties`:
 
 ```properties
-org.slf4j.simpleLogger.defaultLogLevel=debug
+# STEP credentials
+app.id=your-application-id
+app.token=your-application-token
+
+# Test location (latitude, longitude)
+test.latitude=48.866667
+test.longitude=2.333333
 ```
 
-Available levels: `trace`, `debug`, `info`, `warn`, `error`
+### Logging Configuration
 
-### SDK Configuration
-
-The SDK jar is configured in `pom.xml` as a system-scoped dependency:
+Edit `src/main/resources/logback.xml` to adjust log levels:
 
 ```xml
-<dependency>
-    <groupId>com.vodafone</groupId>
-    <artifactId>step-sdk</artifactId>
-    <version>1.0.0</version>
-    <scope>system</scope>
-    <systemPath>${project.basedir}/lib/vodafone-step-sdk.jar</systemPath>
-</dependency>
+<logger name="com.vodafone.v2x" level="DEBUG"/>
+<logger name="com.vodafone.v2xsdk4javav2" level="DEBUG"/>
 ```
 
-## Development Notes
+Available levels: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`
 
-### Current Implementation Status
+## Extending the Application
 
-The current implementation includes:
-- ✅ Complete project structure
-- ✅ Maven build configuration
-- ✅ V2X sender and receiver classes
-- ✅ Event payload and listener interfaces
-- ✅ Main application with lifecycle management
-- ✅ Error handling and logging
-- ✅ Comprehensive documentation
+### Adding More Message Types
 
-**Note:** The actual STEP SDK integration points are marked with `TODO` comments in the code. When the SDK jar is available and its API is known, these sections should be updated with actual SDK method calls.
+The SDK supports additional V2X message types:
 
-### Extending the Application
+- **IVIM** (Infrastructure to Vehicle Information Message)
+- **SPATEM** (Signal Phase and Timing Extended Message)
+- **MAPEM** (MAP Extended Message)
+- **VAM** (Vulnerable Road User Awareness Message)
+- **CPM** (Collective Perception Message)
+- **POIM** (Point of Interest Message)
 
-To add new V2X message types:
+To add support:
+1. Create a new handler implementing `EventListener`
+2. Subscribe to the appropriate `EventType`
+3. Start the corresponding service (e.g., `sdk.startIVIMService()`)
 
-1. Add a new method to `V2XEventSender` (e.g., `sendIVIM()` for Infrastructure to Vehicle Information Messages)
-2. Define the payload structure in `V2XEventPayload.Builder`
-3. Update the event type constants if needed
-4. Add corresponding handler in the receiver if needed
+### Custom Event Handlers
 
-### Testing
+Create custom handlers by implementing the `EventListener` interface:
 
-To add unit tests:
-
-```bash
-mkdir -p src/test/java/com/vodafone/v2x/sample
+```java
+public class CustomHandler implements EventListener {
+    @Override
+    public void onMessageBusEvent(BaseEvent baseEvent) {
+        // Handle event
+    }
+}
 ```
 
-Add test dependencies to `pom.xml`:
+## Implementation Details
 
-```xml
-<dependency>
-    <groupId>org.junit.jupiter</groupId>
-    <artifactId>junit-jupiter</artifactId>
-    <version>5.10.0</version>
-    <scope>test</scope>
-</dependency>
+### FakeLocationProvider (Annex 10.3)
+
+The location provider extends `LocationProvider` and implements `Runnable`:
+- Provides fixed test coordinates at 1-second intervals
+- Thread-safe start/stop with `turnOn()` and `turnOff()`
+- Based on SDK documentation Annex 10.3 (FakeGNSSReceiver)
+
+### SDK Configuration (Section 8.3.1)
+
+Uses the builder pattern:
+```java
+SDKConfiguration config = SDKConfiguration.builder()
+    .applicationID(appId)
+    .applicationToken(token)
+    .stationType(StationType.PASSENGERCAR)
+    .vehicleRole(VehicleRole.DEFAULT)
+    .camServiceMode(ServiceMode.TxAndRx)
+    .denmServiceMode(ServiceMode.TxAndRx)
+    .build();
+```
+
+### Event Subscription (Section 8.3.7)
+
+Subscribe to SDK events:
+```java
+sdk.subscribe(camHandler, EventType.CAMLISTCHANGED);
+sdk.subscribe(denmHandler, EventType.DENMLISTCHANGED);
+```
+
+### DENM Triggering (Section 8.3.9)
+
+Trigger and terminate DENM events:
+```java
+// Trigger
+long seqNum = sdk.denmTrigger(DENMType.ACCIDENT, location);
+
+// Later terminate
+sdk.denmTerminate(seqNum);
 ```
 
 ## Troubleshooting
@@ -341,37 +338,59 @@ Add test dependencies to `pom.xml`:
 
 **Error:**
 ```
-Cannot resolve system-scoped dependency: com.vodafone:step-sdk:jar:1.0.0
+Cannot resolve system-scoped dependency: com.vodafone:v2xsdk4java:jar:3.1.0
 ```
 
 **Solution:**
-Ensure the SDK jar is placed at `lib/vodafone-step-sdk.jar` with the exact filename.
+Ensure the SDK jar is placed at `lib/v2xsdk4java-3.1.0.jar` with the exact filename.
+
+### Issue: Missing credentials
+
+**Error:**
+```
+Unable to find application.properties
+```
+
+**Solution:**
+Create `src/main/resources/application.properties` and add your STEP credentials.
+
+### Issue: Service initialization timeout
+
+**Error:**
+```
+Service initialization timeout
+```
+
+**Solution:**
+- Check network connectivity
+- Verify STEP credentials are correct
+- Ensure STEP platform is accessible
+- Check firewall settings
 
 ### Issue: Java version mismatch
 
 **Error:**
 ```
-Unsupported class file major version XX
+Unsupported class file major version
 ```
 
 **Solution:**
-Install Java 21 or update the `maven.compiler.release` property in `pom.xml` to match your Java version.
+Install Java 21 or update the `maven.compiler.release` property in `pom.xml`.
 
-### Issue: Port already in use
+## SDK Documentation
 
-If the STEP SDK requires a specific port that's already in use, check running processes:
-
-```bash
-lsof -i :PORT_NUMBER
-```
-
-And stop conflicting services.
+For detailed SDK information, refer to:
+- `doc/Java V2X SDK - User Guide 3.1.0.pdf` - Complete SDK documentation
+- Section 8.3: SDK initialization and lifecycle
+- Annex 10.3: Location provider implementation
 
 ## References
 
-- [Vodafone STEP Platform Documentation](https://developer.vodafone.com/step)
+- [Vodafone STEP Platform](https://developer.vodafone.com/step)
 - [HelloV2XWorld-Android Example](https://github.com/Vodafone/HelloV2XWorld-Android)
 - [ETSI ITS Standards](https://www.etsi.org/technologies/intelligent-transport)
+  - CAM: ETSI TS 103 900
+  - DENM: ETSI TS 103 831
 - [V2X Communication Overview](https://en.wikipedia.org/wiki/Vehicle-to-everything)
 
 ## License
@@ -381,35 +400,13 @@ Please refer to the Vodafone STEP SDK license terms for usage restrictions and r
 ## Support
 
 For issues related to:
-- **This sample application**: Open an issue in this repository
+- **This example application**: Open an issue in this repository
 - **Vodafone STEP SDK**: Contact Vodafone STEP support
 - **V2X standards**: Refer to ETSI ITS documentation
-
-## Next Steps
-
-This is a starting point for V2X development. Potential enhancements:
-
-1. Add support for more V2X message types (IVIM, SPATEM, MAPEM)
-2. Implement message validation and security
-3. Add geo-fencing and proximity-based filtering
-4. Create a configuration file for runtime parameters
-5. Add metrics and monitoring
-6. Implement message persistence
-7. Add support for multiple simultaneous connections
-8. Create integration tests with real V2X scenarios
-
-## Contributing
-
-When contributing to this sample:
-
-1. Follow existing code style and conventions
-2. Add appropriate comments for V2X-specific concepts
-3. Include error handling for all V2X operations
-4. Update documentation for new features
-5. Test with the actual STEP SDK when available
 
 ---
 
 **Version:** 1.0.0  
 **Last Updated:** 2024  
-**Maintainer:** Vodafone V2X Development Team
+**SDK Version:** 3.1.0  
+**Java Version:** 21

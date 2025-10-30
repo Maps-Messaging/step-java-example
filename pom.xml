@@ -6,12 +6,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.vodafone.v2x</groupId>
-    <artifactId>v2x-sample</artifactId>
+    <artifactId>step-java-example</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>V2X Send/Receive Sample</name>
-    <description>A standalone Java application demonstrating V2X send and receive functionality using the Vodafone STEP SDK</description>
+    <name>V2X STEP Java Example</name>
+    <description>A standalone Java application demonstrating V2X event send/receive using the Vodafone STEP Java SDK</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,17 +19,17 @@
         <maven.compiler.target>21</maven.compiler.target>
         <maven.compiler.release>21</maven.compiler.release>
         <slf4j.version>2.0.9</slf4j.version>
+        <logback.version>1.4.11</logback.version>
     </properties>
 
     <dependencies>
-        <!-- Vodafone STEP SDK - Local Jar Dependency -->
-        <!-- Place the vodafone-step-sdk.jar file in the lib/ directory -->
+        <!-- Vodafone V2X SDK - Local Jar Dependency -->
         <dependency>
             <groupId>com.vodafone</groupId>
-            <artifactId>step-sdk</artifactId>
-            <version>1.0.0</version>
+            <artifactId>v2xsdk4java</artifactId>
+            <version>3.1.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/vodafone-step-sdk.jar</systemPath>
+            <systemPath>${project.basedir}/lib/v2xsdk4java-3.1.0.jar</systemPath>
         </dependency>
 
         <!-- SLF4J API for logging -->
@@ -39,11 +39,11 @@
             <version>${slf4j.version}</version>
         </dependency>
 
-        <!-- SLF4J Simple implementation for console logging -->
+        <!-- Logback Classic for logging implementation -->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
         </dependency>
     </dependencies>
 
@@ -69,7 +69,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.vodafone.v2x.sample.V2XSampleApp</mainClass>
+                            <mainClass>com.vodafone.v2x.example.V2XApplication</mainClass>
                             <addClasspath>true</addClasspath>
                         </manifest>
                     </archive>
@@ -90,7 +90,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.vodafone.v2x.sample.V2XSampleApp</mainClass>
+                                    <mainClass>com.vodafone.v2x.example.V2XApplication</mainClass>
                                 </transformer>
                             </transformers>
                             <filters>

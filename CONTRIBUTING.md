@@ -1,24 +1,28 @@
-# Contributing to V2X Sample Application
+# Contributing to V2X STEP Java Application
 
-Thank you for your interest in contributing to the V2X Sample Application!
+Thank you for your interest in contributing to the V2X STEP Java Application!
 
 ## Getting Started
 
 1. **Fork and Clone**
    ```bash
    git clone <your-fork-url>
-   cd v2x-sample
+   cd step-java-example
    ```
 
 2. **Install Prerequisites**
    - Java 21 or higher
    - Maven 3.6+
-   - Vodafone STEP SDK jar file
+   - Vodafone V2X SDK jar file (v2xsdk4java-3.1.0.jar)
 
 3. **Place SDK**
-   - Copy `vodafone-step-sdk.jar` to the `lib/` directory
+   - Copy `v2xsdk4java-3.1.0.jar` to the `lib/` directory
 
-4. **Build**
+4. **Configure**
+   - Create `src/main/resources/application.properties`
+   - Add your STEP credentials
+
+5. **Build**
    ```bash
    mvn clean package
    ```
@@ -32,38 +36,54 @@ Thank you for your interest in contributing to the V2X Sample Application!
 - Maximum line length: 120 characters
 - Add Javadoc comments for all public classes and methods
 - Use clear, descriptive variable names
+- Follow existing patterns in the codebase
 
 ### Adding New Features
 
 When adding new V2X message types or features:
 
-1. **Sender Side**
-   - Add method to `V2XEventSender.java`
-   - Follow the pattern of existing methods (e.g., `sendCAM()`, `sendDENM()`)
-   - Include detailed Javadoc explaining the message type
+1. **Handler Classes**
+   - Create new handler in `handlers/` package
+   - Implement `EventListener` interface
+   - Follow the pattern of `CAMHandler` or `DENMHandler`
 
-2. **Receiver Side**
-   - Update `V2XEventReceiver.java` if special handling is needed
-   - Consider adding filtering or validation
+2. **Event Subscription**
+   - Subscribe to appropriate `EventType` in main application
+   - Handle events in `onMessageBusEvent()` method
 
-3. **Payload**
-   - Extend `V2XEventPayload.Builder` if new fields are needed
-   - Document the purpose and format of new fields
+3. **Service Lifecycle**
+   - Start service in the application flow (e.g., `sdk.startIVIMService()`)
+   - Stop service during cleanup
 
 4. **Documentation**
    - Update README.md with usage examples
-   - Add comments explaining V2X-specific concepts
+   - Add comments referencing SDK user guide sections
+   - Document ETSI standards if applicable
+
+### Supported V2X Message Types
+
+The SDK supports the following message types:
+
+- **CAM** - Cooperative Awareness Message (ETSI TS 103 900)
+- **DENM** - Decentralized Environmental Notification Message (ETSI TS 103 831)
+- **IVIM** - Infrastructure to Vehicle Information Message
+- **SPATEM** - Signal Phase and Timing Extended Message
+- **MAPEM** - MAP Extended Message
+- **VAM** - Vulnerable Road User Awareness Message
+- **CPM** - Collective Perception Message
+- **POIM** - Point of Interest Message
 
 ### Error Handling
 
 - Always use try-catch blocks for V2X operations
 - Log errors with appropriate context using SLF4J
-- Throw `V2XException` for V2X-specific errors
+- Handle SDK exceptions appropriately
 - Never silently catch and ignore exceptions
+- Ensure proper cleanup in finally blocks or shutdown hooks
 
 ### Logging
 
-Use SLF4J for all logging:
+Use SLF4J with Logback for all logging:
 
 ```java
 private static final Logger logger = LoggerFactory.getLogger(YourClass.class);
@@ -74,106 +94,111 @@ logger.warn("Warning conditions");
 logger.error("Error conditions", exception);
 ```
 
-### Testing
-
-When adding tests:
-
-1. Create test classes in `src/test/java`
-2. Use JUnit 5 for unit tests
-3. Mock the STEP SDK client for testing
-4. Test both success and failure scenarios
-
-Example:
-```java
-@Test
-void testSendCAM() throws V2XException {
-    V2XEventSender sender = new V2XEventSender(mockStepClient);
-    sender.connect();
-    
-    boolean result = sender.sendCAM(51.5074, -0.1278, 13.89, 45.0);
-    
-    assertTrue(result);
-}
-```
+Configure logging in `src/main/resources/logback.xml`.
 
 ## Project Structure
 
 ```
-v2x-sample/
-├── src/main/java/com/vodafone/v2x/sample/
-│   ├── V2XSampleApp.java         # Main application entry point
-│   ├── V2XEventSender.java       # Handles sending V2X messages
-│   ├── V2XEventReceiver.java     # Handles receiving V2X messages
-│   ├── V2XEventPayload.java      # Data structure for V2X messages
-│   ├── V2XEventListener.java     # Interface for event callbacks
-│   └── V2XException.java         # V2X-specific exception
+step-java-example/
+├── src/main/java/com/vodafone/v2x/example/
+│   ├── V2XApplication.java              # Main application class
+│   ├── config/
+│   │   └── AppConfig.java               # Configuration management
+│   ├── location/
+│   │   └── FakeLocationProvider.java    # Location provider (Annex 10.3)
+│   └── handlers/
+│       ├── CAMHandler.java              # CAM message handler
+│       └── DENMHandler.java             # DENM message handler
 ├── src/main/resources/
-│   └── simplelogger.properties   # Logging configuration
+│   ├── application.properties           # STEP credentials (excluded from git)
+│   └── logback.xml                      # Logging configuration
 ├── lib/
-│   └── vodafone-step-sdk.jar     # STEP SDK (provided by user)
-├── pom.xml                        # Maven configuration
-└── README.md                      # Project documentation
+│   └── v2xsdk4java-3.1.0.jar           # V2X SDK (excluded from git)
+├── doc/
+│   └── Java V2X SDK - User Guide 3.1.0.pdf
+├── pom.xml                              # Maven configuration
+└── README.md                            # Project documentation
 ```
 
-## STEP SDK Integration
+## SDK Integration Guidelines
 
-The current implementation includes placeholder code marked with `TODO` comments:
+### SDK References
+
+Always reference SDK documentation sections in comments:
 
 ```java
-// TODO: Implement actual STEP SDK connection logic
-// Example (when SDK is available):
-// stepClient.connect();
+// Section 8.3.8 - Starting CAM Service
+sdk.startCAMService();
 ```
 
-When integrating the actual SDK:
+### Configuration Pattern
 
-1. **Review SDK Documentation**
-   - Study the STEP SDK API
-   - Understand connection lifecycle
-   - Learn message formats and protocols
+Use the builder pattern for SDK configuration:
 
-2. **Update Connection Logic**
-   - Replace mock implementations in `connect()` methods
-   - Add proper authentication and configuration
-   - Handle connection states
+```java
+SDKConfiguration config = SDKConfiguration.builder()
+    .applicationID(appId)
+    .applicationToken(token)
+    .stationType(StationType.PASSENGERCAR)
+    .vehicleRole(VehicleRole.DEFAULT)
+    .camServiceMode(ServiceMode.TxAndRx)
+    .build();
+```
 
-3. **Update Send Logic**
-   - Replace simulation code with actual SDK calls
-   - Convert payload to SDK message format
-   - Handle send results and errors
+### Event Handling
 
-4. **Update Receive Logic**
-   - Implement actual message subscription
-   - Parse incoming SDK messages
-   - Handle message acknowledgment if needed
+Implement `EventListener` for handling V2X events:
+
+```java
+public class CustomHandler implements EventListener {
+    @Override
+    public void onMessageBusEvent(BaseEvent baseEvent) {
+        if (baseEvent.getEventType() == EventType.CUSTOMTYPE) {
+            // Handle event
+        }
+    }
+}
+```
 
 ## Common Tasks
 
-### Adding a New Message Type
+### Adding a New Message Type Handler
 
-1. Add constants:
+1. Create handler class:
    ```java
-   public static final String MESSAGE_TYPE_IVIM = "IVIM";
-   ```
-
-2. Add sender method:
-   ```java
-   public boolean sendIVIM(/* parameters */) throws V2XException {
-       V2XEventPayload payload = V2XEventPayload.builder()
-           // Build payload
-           .build();
-       return sendEvent("IVIM", payload);
+   package com.vodafone.v2x.example.handlers;
+   
+   import com.vodafone.v2xsdk4javav2.facade.events.*;
+   
+   public class IVIMHandler implements EventListener {
+       @Override
+       public void onMessageBusEvent(BaseEvent baseEvent) {
+           if (baseEvent.getEventType() == EventType.IVIMLISTCHANGED) {
+               // Handle IVIM events
+           }
+       }
    }
    ```
 
-3. Update documentation in README.md
+2. Register in main application:
+   ```java
+   IVIMHandler ivimHandler = new IVIMHandler();
+   sdk.subscribe(ivimHandler, EventType.IVIMLISTCHANGED);
+   sdk.startIVIMService();
+   ```
+
+3. Stop service during cleanup:
+   ```java
+   sdk.stopIVIMService();
+   ```
 
 ### Changing Log Levels
 
-Edit `src/main/resources/simplelogger.properties`:
+Edit `src/main/resources/logback.xml`:
 
-```properties
-org.slf4j.simpleLogger.defaultLogLevel=debug
+```xml
+<logger name="com.vodafone.v2x" level="DEBUG"/>
+<logger name="com.vodafone.v2xsdk4javav2" level="DEBUG"/>
 ```
 
 ### Building Without Tests
@@ -182,11 +207,16 @@ org.slf4j.simpleLogger.defaultLogLevel=debug
 mvn clean package -DskipTests
 ```
 
-### Running with Custom Configuration
+### Testing with Different Credentials
+
+Create alternate properties files:
 
 ```bash
-java -Dconfig.file=custom.properties -jar target/v2x-sample-1.0.0.jar
+cp src/main/resources/application.properties config/test.properties
+# Edit test.properties with different credentials
 ```
+
+Then modify code to load from different location if needed.
 
 ## Submitting Changes
 
@@ -198,6 +228,7 @@ java -Dconfig.file=custom.properties -jar target/v2x-sample-1.0.0.jar
 2. **Make Changes**
    - Write clean, documented code
    - Follow the coding guidelines
+   - Reference SDK documentation sections
    - Test your changes
 
 3. **Commit**
@@ -213,6 +244,7 @@ java -Dconfig.file=custom.properties -jar target/v2x-sample-1.0.0.jar
 
 5. **Create Pull Request**
    - Provide a clear description
+   - Reference SDK sections if applicable
    - Reference any related issues
    - Include test results
 
@@ -222,16 +254,36 @@ All contributions go through code review:
 
 - Code follows style guidelines
 - Changes are well-documented
-- Tests pass successfully
+- SDK references are included where appropriate
 - No breaking changes without discussion
 - V2X-specific concepts are clearly explained
+
+## Configuration Management
+
+### Credentials
+
+Never commit credentials to version control:
+
+- `application.properties` is excluded in `.gitignore`
+- Provide example configuration in documentation
+- Use environment variables for CI/CD if needed
+
+### SDK Jar
+
+The SDK jar is excluded from version control:
+
+- Users must obtain it from Vodafone
+- Document the required version clearly
+- Keep `lib/README.md` updated
 
 ## Questions?
 
 If you have questions:
 
 - Check the README.md
+- Review the SDK User Guide in `doc/` folder
 - Review existing code examples
+- Check the HelloV2XWorld-Android reference
 - Open an issue for discussion
 - Contact the maintainers
 
@@ -240,7 +292,25 @@ If you have questions:
 Helpful resources for V2X development:
 
 - [ETSI ITS Standards](https://www.etsi.org/technologies/intelligent-transport)
-- [Vodafone STEP Documentation](https://developer.vodafone.com/step)
+  - CAM: ETSI TS 103 900
+  - DENM: ETSI TS 103 831
+- [Vodafone STEP Platform](https://developer.vodafone.com/step)
+- [HelloV2XWorld-Android](https://github.com/Vodafone/HelloV2XWorld-Android)
 - [V2X Communication Overview](https://en.wikipedia.org/wiki/Vehicle-to-everything)
+
+## Reference Documentation
+
+The SDK User Guide (in `doc/` folder) is your primary reference:
+
+- Section 8.3.1: SDK Configuration
+- Section 8.3.3: Creating SDK Instance
+- Section 8.3.4: Starting V2X Service
+- Section 8.3.5: Waiting for Initialization
+- Section 8.3.6: Waiting for Connectivity
+- Section 8.3.7: Event Subscription
+- Section 8.3.8: CAM Service
+- Section 8.3.9: DENM Service
+- Section 8.3.17: Shutdown
+- Annex 10.3: Location Provider Implementation
 
 Thank you for contributing!
