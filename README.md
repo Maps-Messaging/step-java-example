@@ -108,28 +108,49 @@ mvn clean package
 
 This will:
 1. Compile the Java source files
-2. Create a regular jar: `target/step-java-example-1.0.0.jar`
-3. Create an uber jar with dependencies: `target/step-java-example-1.0.0-shaded.jar`
+2. Create a fat JAR at `target/step-java-example.jar` that includes all dependencies (including the system-scoped SDK jar)
+
+**Important:** The Maven Shade Plugin is configured with `<includeSystemScope>true</includeSystemScope>` to ensure the V2X SDK jar is bundled into the executable JAR.
 
 ## Running the Application
 
-### Option 1: Run with Maven
-
-```bash
-mvn exec:java -Dexec.mainClass="com.vodafone.v2x.example.V2XApplication"
-```
-
-### Option 2: Run the Uber Jar
-
-```bash
-java -jar target/step-java-example-1.0.0-shaded.jar
-```
-
-### Option 3: Use the Run Script
+### Option 1: Using the run script (recommended)
 
 ```bash
 ./run.sh
 ```
+
+This script:
+- Verifies SDK jar and configuration files exist
+- Builds the application if needed
+- Runs the fat JAR with all dependencies included
+
+### Option 2: Direct JAR execution
+
+```bash
+java -jar target/step-java-example.jar
+```
+
+**Note:** Ensure you've run `mvn clean package` first to create the fat JAR.
+
+### Option 3: Using Maven Exec Plugin
+
+```bash
+mvn exec:java
+```
+
+The exec plugin is configured to include the system-scoped SDK dependency automatically.
+
+### Option 4: Run with explicit classpath (alternative)
+
+```bash
+./run-with-classpath.sh
+```
+
+This alternative approach:
+- Builds the application without bundling the SDK
+- Runs with both JARs in the classpath: `-cp target/step-java-example.jar:lib/v2xsdk4java-3.1.0.jar`
+- Keeps JARs separate but requires more complex run configuration
 
 ## Expected Output
 
@@ -334,7 +355,32 @@ sdk.denmTerminate(seqNum);
 
 ## Troubleshooting
 
-### Issue: SDK jar not found
+### Issue: NoClassDefFoundError at runtime
+
+**Error:**
+```
+Caused by: java.lang.NoClassDefFoundError: com/vodafone/v2xsdk4javav2/facade/locationprovider/LocationProvider
+```
+
+**Cause:** The V2X SDK jar is not included in the runtime classpath or packaged into the executable jar.
+
+**Solution:**
+1. Ensure `lib/v2xsdk4java-3.1.0.jar` exists
+2. Rebuild with `mvn clean package` to create the fat JAR
+3. Verify the Maven Shade Plugin in `pom.xml` has `<includeSystemScope>true</includeSystemScope>`
+4. Run with `java -jar target/step-java-example.jar` (not the original jar without dependencies)
+
+**Alternative Solution:**
+Use the explicit classpath approach:
+```bash
+./run-with-classpath.sh
+```
+or manually:
+```bash
+java -cp target/step-java-example.jar:lib/v2xsdk4java-3.1.0.jar com.vodafone.v2x.example.V2XApplication
+```
+
+### Issue: SDK jar not found during build
 
 **Error:**
 ```
