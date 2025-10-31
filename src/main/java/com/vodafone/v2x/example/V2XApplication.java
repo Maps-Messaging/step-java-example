@@ -62,7 +62,7 @@ public class V2XApplication {
                 .camSubscribeGroup("public")
                 .denmServiceMode(ServiceMode.TxAndRx)
                 .denmPublishGroup("public")
-                .denmSubscribeGroup("public")
+                .denmSubscribeGroup("public").stepInstance()
                 .build();
             logger.info("  SDK configuration created");
             logger.info("  - Station Type: PASSENGERCAR");
@@ -104,7 +104,7 @@ public class V2XApplication {
                 Thread.sleep(1000L);
                 logger.debug("  Connectivity state: {}", sdk.getV2XConnectivityState());
                 connectRetries++;
-                if (connectRetries > 30) {
+                if (connectRetries > 3) {
                     throw new RuntimeException("STEP connectivity timeout");
                 }
             }

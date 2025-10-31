@@ -5,10 +5,10 @@
         </encoder>
     </appender>
     
-    <logger name="com.vodafone.v2x" level="INFO"/>
-    <logger name="com.vodafone.v2xsdk4javav2" level="INFO"/>
+    <logger name="com.vodafone.v2x" level="DEBUG"/>
+    <logger name="com.vodafone.v2xsdk4javav2" level="DEBUG"/>
     
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>
