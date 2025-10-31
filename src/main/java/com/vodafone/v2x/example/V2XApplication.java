@@ -73,7 +73,7 @@ public class V2XApplication {
             // 4. Create V2XSDK instance (Section 8.3.3)
             logger.info("Step 4: Creating V2X SDK instance...");
             sdk = new V2XSDK(locationProvider, sdkConfig);
-            sdk.setSDKLogLevel(LogLevel.INFO);
+            sdk.setSDKLogLevel(LogLevel.DEBUG);
             logger.info("  V2X SDK instance created");
             logger.info("");
             
