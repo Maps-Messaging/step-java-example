@@ -62,7 +62,7 @@ public class V2XApplication {
                 .camSubscribeGroup("public")
                 .denmServiceMode(ServiceMode.TxAndRx)
                 .denmPublishGroup("public")
-                .denmSubscribeGroup("public").stepInstance()
+                .denmSubscribeGroup("public")
                 .build();
             logger.info("  SDK configuration created");
             logger.info("  - Station Type: PASSENGERCAR");
