@@ -6,13 +6,7 @@ import com.vodafone.v2x.example.handlers.DENMHandler;
 import com.vodafone.v2x.example.location.FakeLocationProvider;
 import com.vodafone.v2xsdk4javav2.facade.V2XSDK;
 import com.vodafone.v2xsdk4javav2.facade.SDKConfiguration;
-import com.vodafone.v2xsdk4javav2.facade.enums.DENMType;
-import com.vodafone.v2xsdk4javav2.facade.enums.LogLevel;
-import com.vodafone.v2xsdk4javav2.facade.enums.ServiceMode;
-import com.vodafone.v2xsdk4javav2.facade.enums.StationType;
-import com.vodafone.v2xsdk4javav2.facade.enums.V2XConnectivityState;
-import com.vodafone.v2xsdk4javav2.facade.enums.V2XServiceState;
-import com.vodafone.v2xsdk4javav2.facade.enums.VehicleRole;
+import com.vodafone.v2xsdk4javav2.facade.enums.*;
 import com.vodafone.v2xsdk4javav2.facade.events.EventType;
 import com.vodafone.v2xsdk4javav2.facade.models.GnssLocation;
 import org.slf4j.Logger;
@@ -39,6 +33,7 @@ public class V2XApplication {
             AppConfig config = new AppConfig();
             logger.info("  Application ID: {}", config.getApplicationId());
             logger.info("  Test Location: ({}, {})", config.getTestLatitude(), config.getTestLongitude());
+            logger.info("  STEP Instance: {}, {}, {}", StepInstance.DE_DEV_FRANKFURT,StepInstance.DE_DEV_FRANKFURT.getMqttHost(),StepInstance.DE_DEV_FRANKFURT.getMqttPort());
             logger.info("");
             
             // 2. Create location provider (Annex 10.3)
@@ -53,16 +48,14 @@ public class V2XApplication {
             // 3. Configure SDK (Section 8.3.1)
             logger.info("Step 3: Configuring V2X SDK...");
             SDKConfiguration sdkConfig = SDKConfiguration.builder()
+                .stepInstance(StepInstance.DE_DEV_FRANKFURT)
                 .applicationID(config.getApplicationId())
                 .applicationToken(config.getApplicationToken())
+                .mqttClientID("testClient123")
                 .stationType(StationType.PASSENGER_CAR)
-                .vehicleRole(VehicleRole.DEFAULT)
-                .camServiceMode(ServiceMode.TxAndRx)
-                .camPublishGroup("public")
-                .camSubscribeGroup("public")
                 .denmServiceMode(ServiceMode.TxAndRx)
-                .denmPublishGroup("public")
-                .denmSubscribeGroup("public")
+                .denmPublishGroup("926696_216")
+                .denmSubscribeGroup("926696_216")
                 .build();
             logger.info("  SDK configuration created");
             logger.info("  - Station Type: PASSENGERCAR");
@@ -72,8 +65,9 @@ public class V2XApplication {
             
             // 4. Create V2XSDK instance (Section 8.3.3)
             logger.info("Step 4: Creating V2X SDK instance...");
+
             sdk = new V2XSDK(locationProvider, sdkConfig);
-            sdk.setSDKLogLevel(LogLevel.DEBUG);
+            sdk.setSDKLogLevel(LogLevel.WARN);
             logger.info("  V2X SDK instance created");
             logger.info("");
             
@@ -104,7 +98,7 @@ public class V2XApplication {
                 Thread.sleep(1000L);
                 logger.debug("  Connectivity state: {}", sdk.getV2XConnectivityState());
                 connectRetries++;
-                if (connectRetries > 3) {
+                if (connectRetries > 10) {
                     throw new RuntimeException("STEP connectivity timeout");
                 }
             }
