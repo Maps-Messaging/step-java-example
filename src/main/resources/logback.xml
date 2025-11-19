@@ -4,11 +4,26 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    
-    <logger name="com.vodafone.v2x" level="DEBUG"/>
-    <logger name="com.vodafone.v2xsdk4javav2" level="DEBUG"/>
-    
-    <root level="DEBUG">
+
+    <!-- Application logging - default INFO -->
+    <logger name="com.vodafone.v2x" level="INFO"/>
+
+    <!-- V2X SDK logging - default INFO (set to DEBUG via sdk.setSDKLogLevel() when debug.mode=true) -->
+    <logger name="com.vodafone.v2xsdk4javav2" level="INFO"/>
+
+    <!-- MQTT client logging (Eclipse Paho) - default WARN -->
+    <logger name="org.eclipse.paho" level="WARN"/>
+    <logger name="org.eclipse.paho.client.mqttv3" level="WARN"/>
+    <logger name="org.eclipse.paho.client.mqttv3.internal" level="WARN"/>
+    <logger name="org.eclipse.paho.client.mqttv3.internal.wire" level="WARN"/>
+
+    <!-- HiveMQ MQTT client (alternative) - default WARN -->
+    <logger name="com.hivemq" level="WARN"/>
+
+    <!-- Netty (often used for MQTT) - default WARN -->
+    <logger name="io.netty" level="WARN"/>
+
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

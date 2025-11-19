@@ -59,10 +59,10 @@ public  class FakeLocationProvider extends LocationProvider implements Runnable 
                 GnssLocation location = new GnssLocation(
                     latitude,
                     longitude,
-                    null,
-                    null,
-                    null,
-                    null,
+                        50.0,
+                        0.0F,
+                    0.0f,
+                    2.0f,
                     timestamp
                 );
                 

@@ -7,3 +7,13 @@ app.token=YOUR_APPLICATION_TOKEN_HERE
 # Test Location (Paris coordinates)
 test.latitude=48.866667
 test.longitude=2.333333
+
+# Service configuration - which V2X services to enable
+# CAM (Cooperative Awareness Messages) - broadcasts vehicle presence
+service.cam.enabled=false
+# DENM (Decentralized Environmental Notification Messages) - event notifications
+service.denm.enabled=true
+
+# Debug mode (true/false) - enables detailed TLS/MQTT debug logging
+# Set to true for troubleshooting connection issues
+debug.mode=false

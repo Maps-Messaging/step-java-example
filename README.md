@@ -93,6 +93,13 @@ app.token=YOUR_APPLICATION_TOKEN_HERE
 # Test Location (Paris coordinates)
 test.latitude=48.866667
 test.longitude=2.333333
+
+# Service configuration - which V2X services to enable
+service.cam.enabled=false   # CAM (Cooperative Awareness Messages)
+service.denm.enabled=true   # DENM (Decentralized Environmental Notification) - default
+
+# Debug mode (true/false) - enables detailed TLS/MQTT debug logging
+debug.mode=false
 ```
 
 To obtain credentials:
@@ -267,15 +274,61 @@ app.token=your-application-token
 # Test location (latitude, longitude)
 test.latitude=48.866667
 test.longitude=2.333333
+
+# Service configuration
+service.cam.enabled=false   # Enable CAM (Cooperative Awareness Messages)
+service.denm.enabled=true   # Enable DENM (Event notifications) - default
 ```
 
+### Service Modes
+
+The application supports running different V2X services independently:
+
+**DENM only (default)** - Event notifications:
+```properties
+service.cam.enabled=false
+service.denm.enabled=true
+```
+Use when you only need to send/receive hazard notifications.
+
+**CAM only** - Vehicle presence broadcasting:
+```properties
+service.cam.enabled=true
+service.denm.enabled=false
+```
+Use when you only need periodic position/status updates.
+
+**Both services** - Full V2X functionality:
+```properties
+service.cam.enabled=true
+service.denm.enabled=true
+```
+Use for complete V2X communication (periodic CAM + event-based DENM).
+
 ### Logging Configuration
+
+The application uses **INFO** level logging by default for clean, production-friendly output.
+
+#### Debug Mode
+
+For troubleshooting connection issues, enable debug mode in `application.properties`:
+
+```properties
+debug.mode=true
+```
+
+When enabled, debug mode provides:
+- **TLS/SSL handshake logs** - See certificate validation and cipher negotiation
+- **MQTT client verbose logs** - Track connection attempts and message flow
+- **SDK debug logs** - Detailed internal SDK operations
+
+#### Manual Log Level Adjustment
 
 Edit `src/main/resources/logback.xml` to adjust log levels:
 
 ```xml
-<logger name="com.vodafone.v2x" level="DEBUG"/>
-<logger name="com.vodafone.v2xsdk4javav2" level="DEBUG"/>
+<logger name="com.vodafone.v2x" level="INFO"/>
+<logger name="com.vodafone.v2xsdk4javav2" level="INFO"/>
 ```
 
 Available levels: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`
