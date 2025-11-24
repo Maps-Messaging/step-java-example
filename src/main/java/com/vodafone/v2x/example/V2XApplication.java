@@ -286,6 +286,7 @@ public class V2XApplication {
             }
         }
 
+
         if (locationProvider != null) {
             try {
                 locationProvider.turnOff();
